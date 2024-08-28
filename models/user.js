@@ -11,10 +11,19 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    mobile: {
+      type: Number,
+      required: true,
+      unique: true,
+    },
+    name: {
+      type: String,
+      required: true,
+    },
   },
   { timestamps: true }
 );
 
-const User = mongoose.model("user", userSchema)
+const User = mongoose.model("user", userSchema);
 
-module.exports = User
+module.exports = User;
