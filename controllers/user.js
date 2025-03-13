@@ -21,7 +21,6 @@ const handleSignup = async (req, res) => {
     
   if (alreadyExist) {
     let errorMessage = "";
-console.log("Alredyexists",alreadyExist);
 
     if (alreadyExist.email === email && alreadyExist.mobile == mobile) {
         errorMessage = "A user with this email and mobile number already exists";
