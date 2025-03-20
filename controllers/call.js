@@ -20,14 +20,6 @@ const handleCall = async (req, res) => {
         "user_id": USER_ID
     }
 
-    // const body = {
-    //     "company_id": "67ca8021a96af930",
-    //     "secret_token": "10b9bfd6aa9fe596938a320c8d646bb6b33aff35f15aae43e75aa482bfe5a53a",
-    //     "type": "1",
-    //     "number": "+917208618752",
-    //     "user_id": "67ca8021ae49b224",
-    //     "public_ivr_id": "67d120c573b3a292"
-    // }
 
 
     var options = {
