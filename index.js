@@ -3,7 +3,7 @@ const ConnectToMongo = require("./connection");
 const cors = require("cors");
 require("dotenv").config();
 
-ConnectToMongo();
+// ConnectToMongo();
 
 const PORT = process.env.PORT || 3000;
 
