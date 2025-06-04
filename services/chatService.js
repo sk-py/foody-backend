@@ -6,7 +6,7 @@ const express = require('express')
  * Retrieves relevant documents from the database based on a query embedding.
  * @param {number[]} queryEmbedding - The embedding of the user's query.
  * @param {number} limit - The number of top relevant documents to retrieve.
- * @returns {Promise<Array<{content: string, source_url: string}>>} - A promise resolving to an array of relevant document objects.
+ * @returns {Promise<Array<{content: string}>>} - A promise resolving to an array of relevant document objects.
  */
 
 async function retrieveRelevantDocs(queryEmbedding, limit = 5) {
@@ -31,7 +31,7 @@ async function retrieveRelevantDocs(queryEmbedding, limit = 5) {
 /**
  * Generates a response using OpenAI's Chat Completion API, augmented with retrieved context.
  * @param {string} userQuery - The original user's question.
- * @param {Array<{content: string, source_url: string}>} retrievedContexts - An array of relevant document chunks.
+ * @param {Array<{content: string}>} retrievedContexts - An array of relevant document chunks.
  * @returns {Promise<string>} - A promise resolving to the LLM's generated response in Markdown format.
  */
 
@@ -122,10 +122,10 @@ async function retrieveRelevantDocs(queryEmbedding, limit = 5) {
 async function generateChatResponse(userQuery, retrievedContexts, res) {
   let contextString = retrievedContexts
     .map((doc, index) => {
-      const source = doc.source_url
-        ? `Source: [${doc.source_url}](${doc.source_url})`
-        : 'No source URL available';
-      return `Document ${index + 1}:\n${doc.content}\n${source}\n`;
+      // const source = doc.source_url
+      //   ? `Source: [${doc.source_url}](${doc.source_url})`
+      //   : 'No source URL available';
+      return `Document ${index + 1}:\n${doc.content}\n`;
     })
     .join('\n');
 

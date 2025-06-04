@@ -26,10 +26,9 @@ async function generateEmbeddings(text) {
 /**
  * Chunks a document, generates embeddings for each chunk, and stores them in the database.
  * @param {string} documentText - The full text content of the document.
- * @param {string} [sourceUrl=null] - Optional URL or source of the document.
  */
 
-async function ingestDocument(documentText, sourceUrl = null) {
+async function ingestDocument(documentText) {
   // 1. Chunk the document using LangChain's RecursiveCharacterTextSplitter
   const splitter = new RecursiveCharacterTextSplitter({
     chunkSize: 500, // Recommended chunk size for RAG context
@@ -49,8 +48,8 @@ async function ingestDocument(documentText, sourceUrl = null) {
         const embedding = await generateEmbeddings(chunk);
         // Use pgvector.toSql() to correctly format the embedding array for PostgreSQL
         await client.query(
-          "INSERT INTO documents (content, embedding, source_url) VALUES ($1, $2, $3)",
-          [chunk, pgvector.toSql(embedding), sourceUrl]
+          "INSERT INTO documents (content, embedding) VALUES ($1, $2)",
+          [chunk, pgvector.toSql(embedding)]
         );
         console.log(`Inserted chunk into DB: ${chunk.substring(0, 50)}...`);
       } catch (chunkError) {
