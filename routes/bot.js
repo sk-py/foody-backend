@@ -7,21 +7,21 @@ const { handleIngestData, handleChatQuery } = require("../controllers/bot");
 
 const router = express.Router();
 
-// router.post("/generate-embedding", async (req, res) => {
-//   const { text } = req.body;
+router.post("/generate-embedding", async (req, res) => {
+  const { text } = req.body;
 
-//   if (!text) {
-//     return res.status(400).json({ error: "Text is required" });
-//   }
+  if (!text) {
+    return res.status(400).json({ error: "Text is required" });
+  }
 
-//   try {
-//     const embedding = await generateEmbeddings(text);
-//     return res.status(200).json({ embedding });
-//   } catch (error) {
-//     console.error("Error generating embedding:", error);
-//     return res.status(500).json({ error: "Failed to generate embedding" });
-//   }
-// });
+  try {
+    const embedding = await generateEmbeddings(text);
+    return res.status(200).json({ embedding });
+  } catch (error) {
+    console.error("Error generating embedding:", error);
+    return res.status(500).json({ error: "Failed to generate embedding" });
+  }
+});
 
 router.post("/ingest-document", handleIngestData);
 
