@@ -14,6 +14,9 @@ async function generateEmbeddings(text) {
       input: text,
     });
 
+    console.log("Usage", response.usage); // Log usage information for monitoring
+    
+
     // Ensure we're accessing the correct embedding data structure
     return response.data[0].embedding;
   } catch (error) {

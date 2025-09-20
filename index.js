@@ -38,7 +38,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/dummy", (req, res) => {
-  console.log("Dummy route hit");
+  res.send("Dummy route hit");
 });
 
 app

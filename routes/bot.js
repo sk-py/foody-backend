@@ -3,29 +3,37 @@ const {
   generateEmbeddings,
   ingestDocument,
 } = require("../services/embeddingService");
-const { handleIngestData, handleChatQuery } = require("../controllers/bot");
+const { handleIngestData, handleChatQuery, handleDynamicQuery,handleLogin, handlePredictionQuery } = require("../controllers/bot");
 
 const router = express.Router();
 
-// router.post("/generate-embedding", async (req, res) => {
-//   const { text } = req.body;
+router.post("/generate-embedding", async (req, res) => {
+  const { text } = req.body;
 
-//   if (!text) {
-//     return res.status(400).json({ error: "Text is required" });
-//   }
+  if (!text) {
+    return res.status(400).json({ error: "Text is required" });
+  }
 
-//   try {
-//     const embedding = await generateEmbeddings(text);
-//     return res.status(200).json({ embedding });
-//   } catch (error) {
-//     console.error("Error generating embedding:", error);
-//     return res.status(500).json({ error: "Failed to generate embedding" });
-//   }
-// });
+  try {
+    const embedding = await generateEmbeddings(text);
+   
+    
+    return res.status(200).json({ embedding });
+  } catch (error) {
+    console.error("Error generating embedding:", error);
+    return res.status(500).json({ error: "Failed to generate embedding" });
+  }
+});
+
+router.post("/auth/login",handleLogin);
 
 router.post("/ingest-document", handleIngestData);
 
 router.post("/user-chat", handleChatQuery);
+
+router.post("/prediction", handlePredictionQuery);
+
+router.post("/query", handleDynamicQuery);
 
 router.post("/client-key", (req, res) => {
   const { key } = req.body;

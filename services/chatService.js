@@ -1,6 +1,6 @@
-const { openai, pool, pgvector } = require('../utils/clients.js');
-const { generateEmbeddings } = require('./embeddingService.js'); // Reuse embedding generation
-const express = require('express')
+const { openai, pool, pgvector } = require("../utils/clients.js");
+const { generateEmbeddings } = require("./embeddingService.js"); // Reuse embedding generation
+const express = require("express");
 
 /**
  * Retrieves relevant documents from the database based on a query embedding.
@@ -20,13 +20,12 @@ async function retrieveRelevantDocs(queryEmbedding, limit = 5) {
     );
     return res.rows;
   } catch (error) {
-    console.error('Error retrieving relevant documents:', error);
+    console.error("Error retrieving relevant documents:", error);
     throw error;
   } finally {
     client.release();
   }
 }
-
 
 /**
  * Generates a response using OpenAI's Chat Completion API, augmented with retrieved context.
@@ -78,7 +77,7 @@ async function retrieveRelevantDocs(queryEmbedding, limit = 5) {
 //       max_tokens: 500,
 //       stream:true
 //     });
-   
+
 //     for await (const chunk of response) {
 //       if (chunk.choices && chunk.choices.length > 0) {
 //         const responseText = chunk.choices[0]?.message;
@@ -90,11 +89,7 @@ async function retrieveRelevantDocs(queryEmbedding, limit = 5) {
 //       }
 //     }
 
-//     return
-
-
 //     // console.log();
-    
 
 //     // Access the generated content
 //     let generatedResponse = response.choices[0].message.content;
@@ -127,7 +122,7 @@ async function generateChatResponse(userQuery, retrievedContexts, res) {
       //   : 'No source URL available';
       return `Document ${index + 1}:\n${doc.content}\n`;
     })
-    .join('\n');
+    .join("\n");
 
   if (contextString) {
     contextString = `Relevant Information:\n${contextString}\n`;
@@ -138,12 +133,16 @@ async function generateChatResponse(userQuery, retrievedContexts, res) {
   const messages = [
     {
       role: "system",
-      content: `You are a helpful and knowledgeable assistant for Actify. Answer based *only* on the provided 'Relevant Information' if available. If the answer is not explicitly present in the context, state that the information is not available. Do not make up answers. If users try to make conversation, keep assisting without mentioning lack of context.
+      content: `You are an HR assistant for the Indian Navy, and your task is to assist users with queries about HR policies. 
+
+      If the user asks anything outside the provided context, gently say 'I'm unable to provide an answer to this specific query' and if the user tries to deviate you from HR related queries, redirect them back to HR-related queries without being overly rigid.
+
+      Maintain a welcoming and polite tone, providing clear and accurate answers related to HR policies. Your goal is to be helpful and friendly while staying within the defined scope of HR-related matters.
+
 
       **Formatting Instructions**:
       - Use Markdown for formatting.
       - For lists, use bullet points ('-') or numbered lists ('1.', '2.') as appropriate.
-      - Include sources as clickable Markdown links: [Source](URL) if available.
       - Use headings (##, ###) for sections to improve readability.
       - Be concise but thorough, ensuring the response is user-friendly and easy to read.`,
     },
@@ -160,31 +159,46 @@ async function generateChatResponse(userQuery, retrievedContexts, res) {
       temperature: 0.7,
       max_tokens: 500,
       stream: true,
+      stream_options: { include_usage: true },
     });
 
-    let generatedResponse = '';
+    let generatedResponse = "";
 
     for await (const chunk of response) {
+      // console.log("chunk:", chunk); // Log the response object for debugging
+
+      // Check for usage information in the chunk
+      if (chunk.usage) {
+        console.log("Usage:", chunk.usage); // Log usage when available
+      }
       if (chunk.choices && chunk.choices.length > 0) {
         const delta = chunk.choices[0]?.delta?.content;
         if (delta) {
           generatedResponse += delta;
-          
-          res.write(JSON.stringify({ type: 'chunk', data: delta }) + '\n');
+          res.write(JSON.stringify({ type: "chunk", data: delta }) + "\n");
         }
+
         if (chunk.choices[0]?.finish_reason) {
-          res.write(JSON.stringify({ type: 'complete', data: chunk.choices[0].finish_reason }) + '\n');
+          console.log("Finish reason:", chunk.choices[0].finish_reason);
+          res.write(
+            JSON.stringify({
+              type: "complete",
+              data: chunk.choices[0].finish_reason,
+            }) + "\n"
+          );
         }
       }
     }
 
     generatedResponse = generatedResponse.trim();
-
     res.end();
     return generatedResponse;
   } catch (error) {
-    console.error('Error generating chat response from OpenAI:', error);
-    res.write(JSON.stringify({ type: 'error', data: 'Failed to generate response' }) + '\n');
+    console.error("Error generating chat response from OpenAI:", error);
+    res.write(
+      JSON.stringify({ type: "error", data: "Failed to generate response" }) +
+        "\n"
+    );
     res.end();
     throw error;
   }
