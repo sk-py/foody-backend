@@ -13,7 +13,7 @@ app.use(express.json());
 app.use(cors());
 
 const authRoutes = require("./routes/user");
-const emailRoutes = require("./routes/email");
+// const emailRoutes = require("./routes/email");
 const callRoutes = require("./routes/call");
 const faceRoutes = require("./routes/face");
 const botRoutes = require("./routes/bot");
@@ -28,7 +28,7 @@ createTable()
   });
 
 app.use("/api/auth", authRoutes);
-app.use("/api/email", emailRoutes);
+// app.use("/api/email", emailRoutes);
 app.use("/api/call", callRoutes);
 app.use("/api/face", faceRoutes);
 app.use("/api/bot", botRoutes);
