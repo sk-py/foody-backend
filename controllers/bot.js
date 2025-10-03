@@ -8,7 +8,7 @@ const {
 } = require("../services/embeddingService");
 const { openai, pool } = require("../utils/clients.js");
 
-const axios = require('axios')
+const axios = require("axios");
 
 const { DynamicTool } = require("@langchain/core/tools");
 
@@ -79,15 +79,15 @@ async function handleIngestData(req, res) {
 
 /**
  * Express controller function to handle user chat queries.
- * Expects { query: string } in the request body.
+ * Expects { query: string, sessionId: string } in the request body.
  */
 async function handleChatQuery(req, res) {
   res.setHeader("Content-Type", "application/x-ndjson");
   res.setHeader("Transfer-Encoding", "chunked");
 
-  const { query } = req.body;
+  const { query, sessionId } = req.body;
 
-  if (!query) {
+  if (!query || !sessionId) {
     res.write(
       JSON.stringify({ type: "error", data: "Query is required" }) + "\n"
     );
@@ -103,7 +103,7 @@ async function handleChatQuery(req, res) {
     const relevantDocs = await retrieveRelevantDocs(queryEmbedding, 5); // Retrieve top 5 docs
 
     // 3. Generate response using the LLM, augmented with context and stream it back to client
-    await generateChatResponse(query, relevantDocs, res);
+    await generateChatResponse(query, relevantDocs, res, sessionId);
   } catch (error) {
     console.error("Error during chat query API call:", error);
     res.write(
@@ -151,7 +151,6 @@ async function handleChatQuery(req, res) {
 
 // Text to SQL schema mapping for dynamic queries
 
-
 async function handlePredictionQuery(req, res) {
   res.setHeader("Content-Type", "application/json");
   res.setHeader("Transfer-Encoding", "chunked");
@@ -173,15 +172,16 @@ async function handlePredictionQuery(req, res) {
     if (row) {
       // Destructure the array to match the desired fields
       const [
-        , // Skip the first element (e.g., "5", possibly an ID)
+        ,
+        // Skip the first element (e.g., "5", possibly an ID)
         satisfaction_level,
         last_evaluation,
         number_project,
         average_montly_hours,
         time_spend_company,
         work_accident,
-        promotion_last_5years,
-        , // Skip the 'left' field (e.g., "1")
+        promotion_last_5years, // Skip the 'left' field (e.g., "1")
+        ,
         department,
         salary,
       ] = row;
@@ -201,14 +201,19 @@ async function handlePredictionQuery(req, res) {
 
       // Make POST request to the /predict endpoint
       try {
-        const response = await axios.post('http://127.0.0.1:8000/predict', formattedData);
+        const response = await axios.post(
+          "http://127.0.0.1:8000/predict",
+          formattedData
+        );
         const predictionData = response.data; // Expected: { "prediction": "Yes", "probability_of_leaving": 0.8026 }
 
         // Return the prediction response to the client
         return res.status(200).json({ data: predictionData });
       } catch (apiError) {
-        console.error('Error calling /predict API:', apiError.message);
-        return res.status(500).json({ error: 'Failed to get prediction from /predict endpoint' });
+        console.error("Error calling /predict API:", apiError.message);
+        return res
+          .status(500)
+          .json({ error: "Failed to get prediction from /predict endpoint" });
       }
     } else {
       return res.status(404).json({
@@ -216,8 +221,8 @@ async function handlePredictionQuery(req, res) {
       });
     }
   } catch (error) {
-    console.error('Error querying Google Sheet:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    console.error("Error querying Google Sheet:", error);
+    return res.status(500).json({ error: "Internal server error" });
   }
 }
 
