@@ -14,7 +14,7 @@ const { DynamicTool } = require("@langchain/core/tools");
 
 const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
-const { querySheetById } = require("../services/querySheetById.js");
+// const { querySheetById } = require("../services/querySheetById.js");
 dotenv.config();
 
 async function handleLogin(req, res) {
@@ -25,32 +25,32 @@ const spreadsheetId = "1fzvw9OxBNtrqcaV4mG2z9riEf4pxREki261cMQ727oQ";
 const sheetName = "Sheet1";
 const columnToSearch = "A";
 
-const fetchRowFromGoogleSheets = new DynamicTool({
-  name: "getDataFromSheet",
-  description: "Retrives user metrics from Google Sheets based on user ID.",
-  func: async (userId) => {
-    try {
-      const row = await querySheetById(
-        spreadsheetId,
-        sheetName,
-        columnToSearch,
-        userId
-      );
-      if (row) {
-        return JSON.stringify(row); // Return row as JSON string
-      } else {
-        return JSON.stringify({
-          error: `User ID "${userId}" not found in Google Sheet.`,
-        });
-      }
-    } catch (error) {
-      console.error("Error in fetchRowFromGoogleSheets:", error.message);
-      return JSON.stringify({
-        error: "Failed to fetch data from Google Sheet.",
-      });
-    }
-  },
-});
+// const fetchRowFromGoogleSheets = new DynamicTool({
+//   name: "getDataFromSheet",
+//   description: "Retrives user metrics from Google Sheets based on user ID.",
+//   func: async (userId) => {
+//     try {
+//       const row = await querySheetById(
+//         spreadsheetId,
+//         sheetName,
+//         columnToSearch,
+//         userId
+//       );
+//       if (row) {
+//         return JSON.stringify(row); // Return row as JSON string
+//       } else {
+//         return JSON.stringify({
+//           error: `User ID "${userId}" not found in Google Sheet.`,
+//         });
+//       }
+//     } catch (error) {
+//       console.error("Error in fetchRowFromGoogleSheets:", error.message);
+//       return JSON.stringify({
+//         error: "Failed to fetch data from Google Sheet.",
+//       });
+//     }
+//   },
+// });
 
 /**
  * Express controller function to handle document ingestion requests.
@@ -163,12 +163,12 @@ async function handlePredictionQuery(req, res) {
   }
 
   try {
-    const row = await querySheetById(
-      spreadsheetId,
-      sheetName,
-      columnToSearch,
-      query
-    );
+    // const row = await querySheetById(
+    //   spreadsheetId,
+    //   sheetName,
+    //   columnToSearch,
+    //   query
+    // );
 
     if (row) {
       // Destructure the array to match the desired fields

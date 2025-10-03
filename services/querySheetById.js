@@ -112,13 +112,13 @@ const { google } = require("googleapis");
 const fs = require("fs");
 
 // Path to your service account key file (use absolute path for testing)
-const serviceAccountKeyFile = "D:\\React Exp\\foody-backend\\stone-index-472518-c7-0381eec7d508.json";
+// const serviceAccountKeyFile = "D:\\React Exp\\foody-backend\\stone-index-472518-c7-0381eec7d508.json";
 
 // Verify file exists
-if (!fs.existsSync(serviceAccountKeyFile)) {
-  throw new Error(`Service account key file not found at ${serviceAccountKeyFile}`);
-}
-console.log(`Service account key file found at ${serviceAccountKeyFile}`);
+// if (!fs.existsSync(serviceAccountKeyFile)) {
+//   throw new Error(`Service account key file not found at ${serviceAccountKeyFile}`);
+// }
+// console.log(`Service account key file found at ${serviceAccountKeyFile}`);
 
 /**
  * Converts a column number to a Google Sheets column letter (e.g., 1 -> A, 27 -> AA)
