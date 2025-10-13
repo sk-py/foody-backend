@@ -4,7 +4,6 @@
 // const { BufferMemory } = require("langchain/memory");
 // const { HumanMessage, SystemMessage, AIMessage } = require("@langchain/core/messages");
 
-
 // /**
 //  * Retrieves relevant documents from the database based on a query embedding.
 //  * @param {number[]} queryEmbedding - The embedding of the user's query.
@@ -117,7 +116,6 @@
 // //   }
 // // }
 
-
 // async function generateChatResponse(userQuery, retrievedContexts, res) {
 //   let contextString = retrievedContexts
 //     .map((doc, index) => {
@@ -142,7 +140,6 @@
 //     //   If the user asks anything outside the provided context, gently say 'I'm unable to provide an answer to this specific query' and if the user tries to deviate you from HR related queries, redirect them back to HR-related queries without being overly rigid.
 
 //     //   Maintain a welcoming and polite tone, providing clear and accurate answers related to HR policies. Your goal is to be helpful and friendly while staying within the defined scope of HR-related matters.
-
 
 //     //   **Formatting Instructions**:
 //     //   - Use Markdown for formatting.
@@ -231,13 +228,16 @@
 
 // module.exports = { retrieveRelevantDocs, generateChatResponse };
 
-
 const { openai, pool, pgvector } = require("../utils/clients.js");
 const { generateEmbeddings } = require("./embeddingService.js");
 const express = require("express");
 const { BufferMemory } = require("langchain/memory");
 const { ChatOpenAI } = require("@langchain/openai");
-const { HumanMessage, SystemMessage, AIMessage } = require("@langchain/core/messages");
+const {
+  HumanMessage,
+  SystemMessage,
+  AIMessage,
+} = require("@langchain/core/messages");
 
 // Store memory instances per session
 const sessionMemories = new Map();
@@ -260,13 +260,13 @@ function getSessionMemory(sessionId) {
       memoryKey: "chat_history",
       k: MEMORY_CONFIG.maxMessages, // Keep last k messages
     });
-    
+
     sessionMemories.set(sessionId, {
       memory,
       lastAccessed: Date.now(),
     });
   }
-  
+
   const session = sessionMemories.get(sessionId);
   session.lastAccessed = Date.now();
   return session.memory;
@@ -329,7 +329,12 @@ async function retrieveRelevantDocs(queryEmbedding, limit = 5) {
  * @param {string} sessionId - Unique identifier for the conversation session
  * @returns {Promise<string>} - A promise resolving to the LLM's generated response in Markdown format.
  */
-async function generateChatResponse(userQuery, retrievedContexts, res, sessionId) {
+async function generateChatResponse(
+  userQuery,
+  retrievedContexts,
+  res,
+  sessionId
+) {
   let contextString = retrievedContexts
     .map((doc, index) => {
       return `Document ${index + 1}:\n${doc.content}\n`;
@@ -345,34 +350,43 @@ async function generateChatResponse(userQuery, retrievedContexts, res, sessionId
   try {
     // Get LangChain memory for this session
     const memory = getSessionMemory(sessionId);
-    
+
     // Load conversation history
     const chatHistory = await memory.loadMemoryVariables({});
     const previousMessages = chatHistory.chat_history || [];
 
     // console.log(previousMessages);
-    
 
     // System prompt
-    const systemPrompt = `You are an HR assistant for the Indian Navy, specializing in HR policies, including legal and regulatory provisions related to personnel appointments, qualifications, and eligibility criteria. Your task is to assist users with queries about these policies, providing accurate, detailed, and contextually appropriate answers based on the provided context.
+    const systemPrompt = `You are an expert assistant specializing in the official documents of the Indian Navy. Your purpose is to assist users by providing accurate, detailed, and contextually appropriate answers based exclusively on the provided source documents.
 
-**Response Guidelines**:
-- **Scope**: Respond only to queries related to Indian Navy HR policies, including legal provisions for roles such as Judge Advocate General, Deputy Judge Advocate General, and judge advocates. While being helpful make sure for queries outside the provided context, politely state: "I'm unable to provide an answer to this specific query as it falls outside HR policy context."
-- **Detail and Accuracy**: Provide comprehensive answers, especially for queries involving legal qualifications or computational rules. Cite specific clauses (e.g., paragraph and subclause numbers) from the provided text and include all relevant sections, such as explanations or provisos.
-- **Ambiguity Handling**: If a query is ambiguous or lacks critical details (e.g., timing, sequence of roles, or specific conditions), ask the user a targeted clarifying question before providing a final answer. For example, ask: "Could you clarify [specific detail, e.g., whether the judicial office was held before or after becoming an advocate]?" If multiple interpretations are possible, explain each scenario and its impact on the answer, clearly stating any assumptions.
-- **Redirecting Off-Topic Queries**: If the user deviates from HR-related queries, gently redirect them with a context-appropriate suggestion, such as: "I'd be happy to assist with questions about Indian Navy HR policies or personnel qualifications. Could you clarify or provide an HR-related query?"
-- **Tone**: Maintain a welcoming, polite, and professional tone, ensuring responses are user-friendly, clear, and precise, even when asking clarifying questions.
-- **Conversation Context**: Use the conversation history to maintain context and provide coherent responses. Reference previous exchanges when relevant.
+Response Guidelines:
 
-**Formatting Instructions**:
-- Use Markdown for clear formatting.
-- Structure responses with headings (##, ###) for sections like 'Eligibility Criteria,' 'Analysis,' 'Clarification Needed,' or 'Conclusion.'
-- Use bullet points ('-') or numbered lists ('1.', '2.') for lists, as appropriate.
-- For computational or interpretive questions, include a step-by-step explanation under a heading like 'Computation of Eligibility.'
-- If asking a clarifying question, place it under a 'Clarification Needed' heading before proceeding with the answer, if possible.
-- Be concise but thorough, ensuring all relevant details are covered, especially for complex legal queries.
+Scope: Your knowledge is strictly limited to the provided documents. For queries that fall outside the provided context, politely state: "I am unable to provide an answer as the topic may not be available in the provided documents. Please provide specific context regarding your query."
 
-**Objective**: Your goal is to provide accurate, detailed, and well-structured answers that fully address HR policy queries, particularly those involving legal or regulatory provisions. When necessary, proactively seek clarification to ensure responses are precise and relevant, enhancing user satisfaction within the defined scope.`;
+Citing Sources (Critical Rule): You must attribute every piece of information to its source. Begin your answers by stating where the information comes from (e.g., "According to the 'Regulations for the Navy, Part I'..." or "In the 'Naval Engineering Manual,' the procedure is..."). If information comes from multiple sources, cite them all.
+
+Handling Broad Queries and Multi-Source Context:
+
+If a user's query is broad (e.g., "what are the authorities of an officer?") and the retrieved context comes from multiple different source documents, your first step is to seek clarification.
+
+Do not merge or summarize the information. Instead, inform the user about the sources you've found.
+
+Example Response: "I have found information on officer authorities in several documents, including the 'Regulations for the Navy, Part I' and the 'Submarine Operations Handbook.' The responsibilities can differ based on the context. Could you clarify which area you are most interested in?"
+
+If the context comes from different sections within the same document, use the clarification technique we discussed previously (e.g., "Are you asking about the Captain, the Executive Officer, or the Engineering Officer?").
+
+Ambiguity Handling: If a query itself is ambiguous (e.g., "Can I take leave?"), ask for clarifying details to narrow down the context before providing an answer.
+
+Tone: Maintain a welcoming, polite, and professional tone.
+
+Conversation Context: Use the conversation history to maintain context.
+
+Formatting Instructions:
+
+Use Markdown for clear formatting (headings, lists).
+
+Objective: Your goal is to function as a reliable expert on a library of official documents. You must provide accurate, source-cited answers, and proactively guide users with clarifying questions when queries are broad or hit multiple sources, ensuring the final answer is precise and trustworthy.`;
 
     // Build messages array
     const messages = [
@@ -387,7 +401,6 @@ async function generateChatResponse(userQuery, retrievedContexts, res, sessionId
       temperature: 0.7,
       maxTokens: 500,
       streaming: true,
-
     });
 
     let generatedResponse = "";
@@ -404,7 +417,7 @@ async function generateChatResponse(userQuery, retrievedContexts, res, sessionId
     }
 
     generatedResponse = generatedResponse.trim();
-    
+
     // Save the conversation to memory
     await memory.saveContext(
       { input: userQuery },
@@ -417,7 +430,7 @@ async function generateChatResponse(userQuery, retrievedContexts, res, sessionId
         data: "stop",
       }) + "\n"
     );
-    
+
     res.end();
     return generatedResponse;
   } catch (error) {
@@ -439,7 +452,7 @@ async function generateChatResponse(userQuery, retrievedContexts, res, sessionId
 async function getConversationHistory(sessionId) {
   const session = sessionMemories.get(sessionId);
   if (!session) return [];
-  
+
   const chatHistory = await session.memory.loadMemoryVariables({});
   return chatHistory.chat_history || [];
 }
