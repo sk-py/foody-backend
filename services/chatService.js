@@ -244,7 +244,7 @@ const sessionMemories = new Map();
 
 // Configuration for memory
 const MEMORY_CONFIG = {
-  maxMessages: 5, // Maximum number of message pairs (k parameter)
+  maxMessages: 8, // Maximum number of message pairs (k parameter)
   sessionTimeout: 30 * 60 * 1000, // 30 minutes in milliseconds
 };
 
@@ -305,7 +305,7 @@ setInterval(cleanupOldSessions, 5 * 60 * 1000);
  * @param {number} limit - The number of top relevant documents to retrieve.
  * @returns {Promise<Array<{content: string}>>} - A promise resolving to an array of relevant document objects.
  */
-async function retrieveRelevantDocs(queryEmbedding, limit = 5) {
+async function retrieveRelevantDocs(queryEmbedding, limit = 8) {
   const client = await pool.connect();
   try {
     const res = await client.query(
