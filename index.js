@@ -17,21 +17,27 @@ const emailRoutes = require("./routes/email");
 const callRoutes = require("./routes/call");
 const faceRoutes = require("./routes/face");
 const botRoutes = require("./routes/bot");
-const { createTable } = require("./utils/dbSetup");
+const superSetRoutes = require('./routes/superset');
+const resumeRoutes = require('./routes/resume');
+const pushRoutes = require('./routes/pushRoutes');
+// const { createTable } = require("./utils/dbSetup");
 
-createTable()
-  .then(() => {
-    console.log("Database setup complete.");
-  })
-  .catch((err) => {
-    console.error("Error setting up database:", err);
-  });
+// createTable()
+//   .then(() => {
+//     console.log("Database setup complete.");
+//   })
+//   .catch((err) => {
+//     console.error("Error setting up database:", err);
+//   });
 
 app.use("/api/auth", authRoutes);
 app.use("/api/email", emailRoutes);
 app.use("/api/call", callRoutes);
 app.use("/api/face", faceRoutes);
 app.use("/api/bot", botRoutes);
+app.use("/api/superset", superSetRoutes);
+app.use("/api/resume", resumeRoutes);
+app.use("/api/notifications", pushRoutes);
 
 app.get("/", (req, res) => {
   res.send("Hello World!");

@@ -37,21 +37,6 @@ let mailTransporter = nodemailer.createTransport({
   },
 });
 
-// let mailDetails = {
-//   from: "shaikh56742@gmail.com",
-//   to: "shifakhan122004@gmail.com",
-//   subject: "Test mail",
-//   text: "Hello :)",
-// };
-
-// const send = mailTransporter.sendMail(mailDetails, function (err, data) {
-//   if (err) {
-//     console.log("Error Occurs");
-//   } else {
-//     console.log("Email sent successfully");
-//   }
-// });
-
 const sendEmail = async (req, res) => {
   const { to, subject, body } = req.body;
 
