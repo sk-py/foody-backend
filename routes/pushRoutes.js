@@ -12,4 +12,10 @@ router.post('/broadcast', pushController.sendBroadcast);
 // Send to ONE USER
 router.post('/send-user', pushController.sendToSpecificUser);
 
+// Unsubscribe THIS device only
+router.post('/unsubscribe/device', pushController.unsubscribeDevice);
+
+// Unsubscribe ALL devices for a USER
+router.post('/unsubscribe/user', pushController.unsubscribeUser);
+
 module.exports = router;

@@ -5,7 +5,7 @@ require("dotenv").config();
 
 // ConnectToMongo();
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3005;
 
 const app = express();
 
@@ -20,6 +20,7 @@ const botRoutes = require("./routes/bot");
 const superSetRoutes = require('./routes/superset');
 const resumeRoutes = require('./routes/resume');
 const pushRoutes = require('./routes/pushRoutes');
+const locationRoutes = require('./routes/location');
 // const { createTable } = require("./utils/dbSetup");
 
 // createTable()
@@ -38,6 +39,7 @@ app.use("/api/bot", botRoutes);
 app.use("/api/superset", superSetRoutes);
 app.use("/api/resume", resumeRoutes);
 app.use("/api/notifications", pushRoutes);
+app.use("/api/location", locationRoutes);
 
 app.get("/", (req, res) => {
   res.send("Hello World!");

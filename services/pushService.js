@@ -139,8 +139,42 @@ const sendNotificationToUser = async (targetUserId, payload) => {
     }
 };
 
+// DELETE SUBSCRIPTIONS
+
+// A. Device Level (The "Logout" button logic)
+const deleteDeviceSubscription = async (endpoint) => {
+    try {
+        await tursoDb.execute({
+            sql: "DELETE FROM subscriptions WHERE endpoint = ?",
+            args: [endpoint]
+        });
+        console.log("Device unsubscribed successfully.");
+        return true;
+    } catch (err) {
+        console.error("Error deleting device sub:", err);
+        throw err;
+    }
+};
+
+// B. User Level (The "Turn off all notifications" logic)
+const deleteAllUserSubscriptions = async (userId) => {
+    try {
+        await tursoDb.execute({
+            sql: "DELETE FROM subscriptions WHERE userId = ?",
+            args: [userId]
+        });
+        console.log(`All devices for user ${userId} have been unsubscribed.`);
+        return true;
+    } catch (err) {
+        console.error("Error deleting user subs:", err);
+        throw err;
+    }
+};
+
 module.exports = {
     saveSubscription,
     deleteSubscription,
-    sendNotificationToUser
+    sendNotificationToUser,
+    deleteDeviceSubscription,
+    deleteAllUserSubscriptions
 };

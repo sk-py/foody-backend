@@ -72,8 +72,36 @@ const sendToSpecificUser = async (req, res) => {
     }
 };
 
+// 4. Unsubscribe THIS device only
+const unsubscribeDevice = async (req, res) => {
+    try {
+        const { endpoint } = req.body;
+        if (!endpoint) return res.status(400).json({ error: "Endpoint is required" });
+
+        await pushService.deleteDeviceSubscription(endpoint);
+        res.status(200).json({ message: "This device has been unsubscribed." });
+    } catch (error) {
+        res.status(500).json({ error: "Failed to unsubscribe device" });
+    }
+};
+
+// 5. Unsubscribe ALL devices for this user
+const unsubscribeUser = async (req, res) => {
+    try {
+        const { userId } = req.body;
+        if (!userId) return res.status(400).json({ error: "UserId is required" });
+
+        await pushService.deleteAllUserSubscriptions(userId);
+        res.status(200).json({ message: "All devices for this user have been unsubscribed." });
+    } catch (error) {
+        res.status(500).json({ error: "Failed to unsubscribe user" });
+    }
+};
+
 module.exports = {
     subscribe,
     sendBroadcast,
-    sendToSpecificUser
+    sendToSpecificUser,
+    unsubscribeDevice,
+    unsubscribeUser
 };

@@ -17,7 +17,7 @@ const generateToken = async (req, res) => {
   //     res.status(400).json({ message: "Dashboard Id is required" });
   //   }
 
-  const dashboard_id = "ec33aac0-27f1-4ab9-93e7-b47025b22138";
+  const dashboard_id = "62a904d3-cf14-425b-bfe6-ca6a4da77e6b";
 
   companyWiseDataSets = [76];
   emailWiseDataSets = [70, 75, 73];
@@ -48,6 +48,8 @@ const generateToken = async (req, res) => {
     );
 
     const accessToken = loginResp.data.access_token;
+    console.log(accessToken,rlsRules);
+    
     console.log("   - Success! Got access token.");
 
     // Step B: Use Access Token to generate a Guest Token (Safe for Frontend)
@@ -102,6 +104,7 @@ const fetchDashboards = async (req, res) => {
     });
     
     const token = loginResp.data.access_token;
+    console.log(token);
     console.log("   - Logged in successfully.");
 
     // Step 2: Fetch the Dashboard List
@@ -116,10 +119,10 @@ const fetchDashboards = async (req, res) => {
           page_size: 100, // Fetch up to 100 dashboards
           order_column: "dashboard_title",
           order_direction: "asc",
-          // We can't always filter columns easily here, so we fetch all and map later
         })
       }
     });
+    
 
     // Step 3: Clean the Data for your Database
     const dashboards = dashboardResp.data.result.map(d => ({
@@ -132,7 +135,7 @@ const fetchDashboards = async (req, res) => {
     console.log("\n--- DASHBOARDS FOUND ---");
     console.table(dashboards);
     
-    res.status(200).json(dashboards);
+    res.status(200).json(dashboardResp.data);
 
     return dashboards;
 
